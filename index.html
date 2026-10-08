@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gyümölcsnapló</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f8f3;
+            color: #243024;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #667366;
+            margin-bottom: 30px;
+        }
+
+        /* Napi összesítő */
+        .summary {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .number {
+            font-size: 48px;
+            font-weight: bold;
+            color: #3b8d3b;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 15px;
+            background: #e2e8e2;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress {
+            height: 100%;
+            width: 0%;
+            background: #55a955;
+            border-radius: 20px;
+            transition: width 0.3s;
+        }
+
+        /* Gyümölcsök */
+        .fruits {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+        }
+
+        .fruit {
+            border: 2px solid transparent;
+            background: white;
+            border-radius: 18px;
+            padding: 18px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        .fruit:hover {
+            transform: translateY(-4px);
+            border-color: #55a955;
+        }
+
+        .fruit.selected {
+            border-color: #3b8d3b;
+            background: #eff9ef;
+        }
+
+        .fruit-image {
+            font-size: 65px;
+            line-height: 1;
+            margin-bottom: 12px;
+        }
+
+        .fruit-name {
+            font-size: 17px;
+            font-weight: bold;
+        }
+
+        .fruit-count {
+            margin-top: 6px;
+            color: #667366;
+            font-size: 14px;
+        }
+
+        /* Összesítés */
+        .details {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .details h2 {
+            margin-top: 0;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e9e5;
+        }
+
+        .reset {
+            display: block;
+            margin: 25px auto 0;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            background: #e85b5b;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .reset:hover {
+            background: #d94b4b;
+        }
+
+        @media (max-width: 700px) {
+            .fruits {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 500px) {
+            .fruits {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🍎 Gyümölcsnapló</h1>
+    <p class="subtitle">
+        Kattints egy gyümölcsre, hogy hozzáadd a mai fogyasztásodhoz!
+    </p>
+
+    <!-- Napi összesítő -->
+    <div class="summary">
+
+        <div>
+            <span class="number" id="total">0</span>
+            <span> adag</span>
+        </div>
+
+        <p>Mai gyümölcsfogyasztás</p>
+
+        <div class="progress-container">
+            <div class="progress" id="progress"></div>
+        </div>
+
+        <p>🎯 Napi cél: <strong>5 adag</strong></p>
+
+    </div>
+
+
+    <!-- Gyümölcsök -->
+    <div class="fruits" id="fruits"></div>
+
+
+    <!-- Részletes összesítés -->
+    <div class="details">
+
+        <h2>📊 Mai összesítés</h2>
+
+        <div id="summaryList">
+            <p>Még nem választottál gyümölcsöt.</p>
+        </div>
+
+        <button class="reset" id="reset">
+            🔄 Nap újrakezdése
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    const fruits = [
+        {
+            name: "Alma",
+            image: "🍎"
+        },
+        {
+            name: "Banán",
+            image: "🍌"
+        },
+        {
+            name: "Narancs",
+            image: "🍊"
+        },
+        {
+            name: "Eper",
+            image: "🍓"
+        },
+        {
+            name: "Szőlő",
+            image: "🍇"
+        },
+        {
+            name: "Görögdinnye",
+            image: "🍉"
+        },
+        {
+            name: "Ananász",
+            image: "🍍"
+        },
+        {
+            name: "Őszibarack",
+            image: "🍑"
+        },
+        {
+            name: "Körte",
+            image: "🍐"
+        },
+        {
+            name: "Cseresznye",
+            image: "🍒"
+        },
+        {
+            name: "Kiwi",
+            image: "🥝"
+        },
+        {
+            name: "Mangó",
+            image: "🥭"
+        }
+    ];
+
+
+    // Mennyiségek
+    const counts = {};
+
+    fruits.forEach(fruit => {
+        counts[fruit.name] = 0;
+    });
+
+
+    const fruitContainer = document.getElementById("fruits");
+
+
+    // Gyümölcsök létrehozása
+    fruits.forEach(fruit => {
+
+        const element = document.createElement("div");
+
+        element.className = "fruit";
+
+        element.innerHTML = `
+            <div class="fruit-image">
+                ${fruit.image}
+            </div>
+
+            <div class="fruit-name">
+                ${fruit.name}
+            </div>
+
+            <div class="fruit-count">
+                <span class="count">0</span> adag
+            </div>
+        `;
+
+
+        // Kattintás
+        element.addEventListener("click", () => {
+
+            counts[fruit.name]++;
+
+            update();
+
+        });
+
+
+        fruitContainer.appendChild(element);
+
+    });
+
+
+    function update() {
+
+        // Összes adag
+        let total = 0;
+
+        fruits.forEach(fruit => {
+            total += counts[fruit.name];
+        });
+
+
+        // Fő számláló
+        document.getElementById("total").textContent = total;
+
+
+        // Progress bar
+        const percentage = Math.min((total / 5) * 100, 100);
+
+        document.getElementById("progress").style.width =
+            percentage + "%";
+
+
+        // Gyümölcskártyák frissítése
+        const cards = document.querySelectorAll(".fruit");
+
+        cards.forEach((card, index) => {
+
+            const fruit = fruits[index];
+
+            const countElement =
+                card.querySelector(".count");
+
+            countElement.textContent =
+                counts[fruit.name];
+
+
+            if (counts[fruit.name] > 0) {
+                card.classList.add("selected");
+            } else {
+                card.classList.remove("selected");
+            }
+
+        });
+
+
+        // Összesítő lista
+        const summaryList =
+            document.getElementById("summaryList");
+
+        const selectedFruits =
+            fruits.filter(fruit => counts[fruit.name] > 0);
+
+
+        if (selectedFruits.length === 0) {
+
+            summaryList.innerHTML =
+                "<p>Még nem választottál gyümölcsöt.</p>";
+
+            return;
+        }
+
+
+        summaryList.innerHTML = "";
+
+
+        selectedFruits.forEach(fruit => {
+
+            const row =
+                document.createElement("div");
+
+            row.className = "detail-row";
+
+            row.innerHTML = `
+                <span>
+                    ${fruit.image}
+                    ${fruit.name}
+                </span>
+
+                <strong>
+                    ${counts[fruit.name]} adag
+                </strong>
+            `;
+
+            summaryList.appendChild(row);
+
+        });
+
+    }
+
+
+    // Visszaállítás
+    document.getElementById("reset").addEventListener("click", () => {
+
+        fruits.forEach(fruit => {
+            counts[fruit.name] = 0;
+        });
+
+        update();
+
+    });
+
+
+    // Kezdeti állapot
+    update();
+
+</script>
+
+</body>
+</html>
